@@ -13,4 +13,9 @@
 <a href="https://travis-ci.org/giob1994/Alistair.jl">
  <img src="https://travis-ci.org/giob1994/Alistair.jl.svg?branch=master">
  </a>
+ <br>
+</p>
+
+<p align="center">
+ <img src="./assets/example.png">
 </p>
