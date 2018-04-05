@@ -82,17 +82,17 @@ function hasintercept{T<:Number}(A::Array{T})
 end
 
 function addintercept{T<:Number}(A::Array{T})
-    if (!hasintercept(X)) 
-        return hcat(ones(size(X)[1],1), X) 
+    if (!hasintercept(A)) 
+        return hcat(ones(size(A)[1],1), A) 
     else
-        return X
+        return A
     end
 end
 
 function nointercept{T<:Number}(A::Array{T})
-    if (hasintercept(X)) 
-        return X[:,2:end]
+    if (hasintercept(A)) 
+        return A[:,2:end]
     else
-        return X
+        return A
     end
 end

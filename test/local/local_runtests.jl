@@ -1,9 +1,4 @@
-#include("Alistair.jl")
-include("types.jl")
-include("linregress.jl")
-include("mixfunctions.jl")
-include("genericregress.jl")
-#import Alistair
+using Alistair
 using Base.Test
 
 # TEST OPTIONS

@@ -2,6 +2,9 @@
 # Linear Regression routines
 # -----------------------------------------------
 
+"""
+Linear regression function
+"""
 function linregress{T<:Number}(X::Array{T}, Y::Array{T}, regtype=OLS())
     if typeof(regtype) == OLS 
         return ols_linfit(X, Y, regtype.intercept, regtype.robust)

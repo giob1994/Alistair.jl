@@ -1,7 +1,7 @@
-include("types.jl")
-include("linregress.jl")
-include("mixfunctions.jl")
-include("genericregress.jl")
+using Compat, DataFrames, StatsBase
+using Compat.Test
+using GLM
+using Alistair
 
 # PERFORMANCE COMPARISON OPTIONS
 const TEST_SIZE_1 = 100000

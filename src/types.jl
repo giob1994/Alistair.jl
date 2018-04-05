@@ -13,7 +13,7 @@ const AbsRes   = Optim.OptimizationResults
 
 # #########   REGRESSION TYPES   #########
 
-"""
+""" 
 ## Regression Types
 
 Every regression has a specific type inherited by the abstract type `AbstractRegressionType`.
