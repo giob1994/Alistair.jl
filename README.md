@@ -6,7 +6,7 @@
   <br>
 </h1>
 
-<h3 align="center">The <i>minimal</i> regression library for <a href="http://julialang.org" target="_blank">Julia</a></h3>
+<h3 align="center">A <i>minimal</i> regression library for <a href="http://julialang.org" target="_blank">Julia</a></h3>
 <p align="center">
  <img src="https://img.shields.io/badge/Version-beta%200.1-a380bc.svg">
    &nbsp;
@@ -47,17 +47,16 @@ Pkg.clone("https://github.com/giob1994/Alistair.jl.git")
 - [x] **Non-Linear Regression**: generic solver for *any* `Y = f(X, β)` model.
 - [ ] *Confidence Intervals*.
 - [ ] *T-test*.
-- [ ] *Logit/Probit, Multivariate Regressions*
+- [ ] *Logit/Probit, Multivariate Regressions*.
 - [ ] *Syntactic Function Interpreter* for non-linear models.
+- [ ] *Compatibility with DataFrames*.
 
 #### 
 
 
 ## Why Alistair.jl?
 
-While Julia already has some packages for regression, like **[GLM.jl](https://github.com/JuliaStats/GLM.jl)** or **[Regression.jl](https://github.com/lindahua/Regression.jl)**, sometimes a simple, bare-bones regression package is *just what is needed*. 
-
-For example, *GLM.jl* uses *DataFrames* as input type, and the syntax relies on high-level constructs. 
+While Julia already has some packages for regression, like **[GLM.jl](https://github.com/JuliaStats/GLM.jl)** or **[Regression.jl](https://github.com/lindahua/Regression.jl)**, sometimes a simple, bare-bones regression package is *just what is needed*. For example, *GLM.jl* accepts **only** *DataFrames* as input type, and the syntax relies on high-level constructs. 
 
 **Alistair.jl**, on the other hand, tries to be ***minimal***, ***intuitive*** and ***fast***.
 
@@ -99,7 +98,7 @@ ret = solve(linearreg(X, Y; bias=1.0);
 
 ## Basic Usage
 
-**Alistair.jl** works at different level of abstraction, so that if you *want*, it is possible to access directly the main solution routines for (marginally) faster and even more direct computation. 
+**Alistair.jl** works at different levels of abstraction, so that if you *want*, it is possible to access the main solution routines directly for even (marginally) faster computation. 
 
 *However*, because low-level equals risky, the best idea is to *go at your own speed*: if you are unsure of what function does what, or you are not 100% confident about the data you are handling, the higher-level functions will be happy to try and check issues for you. Don't drink *and* regress!
 
@@ -118,9 +117,10 @@ These is is a cheatsheet of good-to-know assumptions Alistair.jl makes:
 
 #### Using `solve(X, Y, regtype)`
 
-The most simple command the Alistair.jl exposes is `solve()`, which takes care of routing your regression call to the right solver, and also checks up that the data is consistent and well-defined.
+The most simple command the Alistair.jl exposes is `solve()`, which takes care of routing your regression call to the right solver - *whatever type of regression you have decided to tun* -, and also checks up that the data is consistent and well-defined.
 
 *Example*:
+
 ```julia
 # Do a simple OLS regression of Y over regressors in X:
 
@@ -129,14 +129,16 @@ res = solve(X, Y, OLS())
 # NOTE:	OLS() defaults to: OLS(intercept=true, robust=false)
 ```
 
-#### Using `linregress()`
+#### Using `linregress(X, Y, regtype)`
+
 If the `regtype` argument in `solve()` indicates a *linear* regression, then after some checks the function `linregress()` is called. If you want to access this function directly, you can do so:
 
 *Example*:
+
 ```julia
 # Do a simple OLS regression of Y over regressors in X:
 # NOTE: this is equivalent to the previous example with
-		solve()
+#       solve()
 
 res = linregress(X, Y, OLS())
 ```
@@ -151,7 +153,7 @@ which you can call yourself too, if you so want! Alistair.jl exports `ols_linfit
 
 #### Robust variance matrices
 
-As you might have notices, `OLS()` has an argument called `robust`. Alistair.jl allows to specify the way of computing the variance-covariance matrix of the regression, and specifically allows for the Eicker-White HEC form
+As you might have notices, `OLS()` has an argument called `robust`. Alistair.jl allows to specify the way of computing the variance-covariance matrix of the regression, and specifically allows for the **Eicker-White HEC** form.
 
 *Example*:
 ```julia
@@ -177,7 +179,6 @@ julia> println(linregress(X, Y, OLS()))
  MSE: 0.919119435739212
 
  Variance: 2×2 Array{Float64,2}:
-Out[1]:
   0.000380835  -5.6841e-6 
  -5.6841e-6     1.12556e-7
 
@@ -205,9 +206,9 @@ Alistair specifies its own types for regressions and more. This is a useful chee
 | Regression   | Alistair.jl Type        | Default form |
 |--------------|-------------------------|---------------|
 | OLS | `OLS` | `OLS(intercept=true, robust=false)` |
-| GLS | `GLS` | `GLS(omega; intercept=true, robust=false)` |
+| GLS | `GLS` | `GLS(omega; intercept=true, robust=false)` <br> where `omega` is the mastrix chose for the GLS "sandwich" estimator |
 | FGLS | `FGLS` | `FGLS(intercept=true, robust=false)` |
-| Iterated FGLS | `IteratedFLGS` | `IteratedFGLS(iterations; intercept=true, robust=false)` |
+| Iterated FGLS | `IteratedFLGS` | `IteratedFGLS(iterations; intercept=true, robust=false)` <br> where `iterations` is the *maximum* number of iterations allowed: `IteratedFLGS` may stop earlier because convergence has been reached |
 
 #### Non-Linear Regression Types
 
@@ -241,3 +242,6 @@ myVariance = <VarianceMatrixTypeYouNeed>(...)
 | HCE (Eicker-White) | `HCEVariance` | `HCEVariance(X, residuals)` |
 
 
+## Note on Performance
+
+**Alistair.jl** is coded in standard Julia language operators like `\\`, `\*` and `inv()`. Since Julia automatically produces code that uses LAPACK functions [[1]](https://docs.julialang.org/en/stable/stdlib/linalg/), there is no real use in fiddling with LAPACK functions *inside* Julia. However, it might interesting to explore usage of SIMD functions and the parallel programming capabilities of Julia to accelerate regressions with datasets in the order of 10⁵-10⁶ observations or more.

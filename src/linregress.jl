@@ -19,6 +19,8 @@ function linregress{T<:Number}(X::Array{T}, Y::Array{T}, regtype=OLS())
     end
 end
 
+# #########   OLS   #########
+
 function ols_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust=false)
     X = intercept ? addintercept(X) : nointercept(X)
     ols_beta = (X' * X) \ (X' * Y)
@@ -33,10 +35,15 @@ function ols_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust=
     return linearfitresult(OLS, X, Y, ols_beta, residuals, variance, robust)  
 end
 
+# #########   GLS   #########
+
 function gls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, omega::Array{T}, intercept=true, robust=false)
     X = intercept ? addintercept(X) : nointercept(X)
+    #TODO
     return 1
 end
+
+# #########   FGLS   #########
 
 function fgls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust=false)
     X = intercept ? addintercept(X) : nointercept(X)
@@ -55,6 +62,8 @@ function fgls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust
     end
     return linearfitresult(FGLS, X, Y, fgls_beta, residuals, variance, robust) 
 end
+
+# #########   Iterated FGLS   #########
 
 function iteratedfgls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, iterations::Int=1, intercept=true, robust=false)
     X = intercept ? addintercept(X) : nointercept(X)

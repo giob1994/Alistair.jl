@@ -24,13 +24,13 @@ end
 
 function isvectorarray{T<:Number}(A::Array{T})
     if !issingletonarray(A)
-        return (size(A)[1] == 1 || size(A)[2] == 1) ? true : false
+        return (size(A)[1] == 1 || size(A)[2] == 1)
     end
 end
 
 function isrowarray{T<:Number}(A::Array{T})
     if !issingletonarray(A)
-        return size(A)[1] == 1 ? true : false
+        return size(A)[1] == 1
     else
         return false
     end
@@ -38,14 +38,14 @@ end
 
 function iscolumnarray{T<:Number}(A::Array{T})
     if !issingletonarray(A)
-        return size(A)[2] == 1 ? true : false
+        return size(A)[2] == 1
     else
         return false
     end
 end
 
 function issingletonarray{T<:Number}(A::Array{T})
-    return length(size(A)) == 1 ? true : false
+    return (length(size(A)) == 1 && length(A) == 1)
 end
 
 function row{T<:Number}(A::Array{T,1})
@@ -95,4 +95,8 @@ function nointercept{T<:Number}(A::Array{T})
     else
         return A
     end
+end
+
+function iscategorical{T<:Number}(A::Array{T})
+    return mapreduce(x -> (x == 1 || x == 0), &, A)
 end

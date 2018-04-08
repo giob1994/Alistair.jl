@@ -20,6 +20,8 @@ Every regression has a specific type inherited by the abstract type `AbstractReg
 """
 abstract type AbstractRegressionType end
 
+# ---- LINEAR REGRESSION ----
+
 """
 ## Linear Regression
 
@@ -99,6 +101,24 @@ struct IteratedFGLS<:LinearRegressionType
         new(iterations, intercept, robust)
     end
 end 
+
+# ---- GENERAL LINEAR MODEL REGRESSION ----
+
+abstract type GLMRegressionType<:AbstractRegressionType end
+
+struct Logit<:GLMRegressionType
+    intercept::Bool
+    robust::Any
+
+    function Logit(; intercept::Bool=true, robust=false)
+        if robust != false && !(typeof(robust) <: AbstractVarianceMatrix)
+            error("Robust option is unrecognized")
+        end
+        new(intercept, robust)
+    end
+end
+
+# ---- NONLINEAR REGRESSION ----
 
 """
 ## Non-Linear Regression
@@ -199,6 +219,31 @@ struct linearfitresult<:AbstractFittingResult
             error("Robust option is unrecognized")
         end
         new(callertype, beta, residuals, mse, variance, robust, iterations)
+    end
+end
+
+"""
+### GLM Fitting Result
+
+Type that wraps results for outputs of a `GLMRegressionType` regression.
+"""
+
+struct glmfitresult<:AbstractFittingResult
+    callertype
+    beta
+    residuals
+    mse
+    variance
+    robust::Any
+    converged::Bool
+    iterations::Int
+
+    function glmfitresult{T<:Number}(callertype::Any, X::Array{T}, Y::Array{T}, beta::Array{T}, residuals::Array{T}, variance::Array{T}, robust::Any, converged::Bool, iterations::Int=0)
+        mse = sum(residuals.^2)
+        if robust != false && !(typeof(robust) <: AbstractVarianceMatrix)
+            error("Robust option is unrecognized")
+        end
+        new(callertype, beta, residuals, mse, variance, robust, converged, iterations)
     end
 end
 

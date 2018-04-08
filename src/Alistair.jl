@@ -9,6 +9,8 @@ module Alistair
         GLS,
         FGLS,
         IteratedFGLS,
+        GLMRegressionType,
+        Logit,
         NonLinearRegressionType,
         Optimize,
         genericfitresult,
@@ -25,13 +27,22 @@ module Alistair
         gls_linfit,
         fgls_linfit,
         iteratedfgls_linfit,
+        # GLM Regressions
+        glmregress,
+        logit_glmfit,
         # Non-Linear Regressions
         nlinfit,
-        optimize_nlinfit
+        optimize_nlinfit,
+        # DistribTools
+        PDF,
+        logLike
     
+    include("regtools.jl")
+    include("distribtools.jl")
     include("types.jl")
     include("linregress.jl")
+    include("glmregress.jl")
+    include("nlinregress.jl")
     include("genericregress.jl")
-    include("regtools.jl")
 
 end # module end
