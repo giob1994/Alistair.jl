@@ -8,7 +8,7 @@
 
 <h3 align="center">A <i>minimal</i> regression library for <a href="http://julialang.org" target="_blank">Julia</a></h3>
 <p align="center">
- <img src="https://img.shields.io/badge/Version-beta%200.1-a380bc.svg">
+ <img src="https://img.shields.io/badge/Version-beta%200.2-a380bc.svg">
    &nbsp;
  <a href="http://julialang.org">
  	<img src="https://img.shields.io/badge/Julia-v0.6-brightgreen.svg">
@@ -46,7 +46,7 @@ Pkg.clone("https://github.com/giob1994/Alistair.jl.git")
 - [x] **Linear Regressions**: OLS, GLS, Feasible GLS, Iterated FGLS.
 - [x] **Robust Variance Matrices**: simple and HCE (Eicker-White) variance.
 - [x] **Non-Linear Regression**: generic solver for *any* `Y = f(X, β)` model.
-- [x] **T-test & Confidence Intervals** for coefficients
+- [x] **T-test & Confidence Intervals** for estimated coefficients.
 - [ ] *Logit/Probit, Multivariate Regressions*.
 - [ ] *Syntactic Function Interpreter* for non-linear models.
 - [ ] *Compatibility with DataFrames*.
