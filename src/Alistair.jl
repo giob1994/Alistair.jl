@@ -1,6 +1,7 @@
 module Alistair
 
-    using Optim
+    using Optim     # non-linear solver backend
+    using Rmath     # distributions backend
 
     export
         # Types
@@ -35,7 +36,11 @@ module Alistair
         optimize_nlinfit,
         # DistribTools
         PDF,
-        logLike
+        CDF,
+        logLike,
+        # Tools
+        __test,
+        present
     
     include("regtools.jl")
     include("distribtools.jl")

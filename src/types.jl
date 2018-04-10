@@ -160,15 +160,30 @@ abstract type AbstractFittingResult end
 
 function Base.show(io::IO, fitresult::AbstractFittingResult)
     # println(io, "£$(money.pounds).$(money.shillings)s.$(money.pence)d")
-    println("\n- RegResult [ $(fitresult.callertype) ] -\n")
-    println(" Beta: $(fitresult.beta)\n")
+    f_ = "-------------"
+    s_ = "  "
+    println("\n# $f_ RegResult [ $(fitresult.callertype) ] $f_ #\n")
+    #println(" Beta: $(fitresult.beta)\n")
     #present(fitresult.beta)
-    println(" MSE: $(fitresult.mse)\n")
-    print(" Variance: ")
-    present(fitresult.variance)
+    println(" N of obs.: \t$(@sprintf("%8d", fitresult.N))")
+    println(" MSE:       \t$(@sprintf("%8f", fitresult.mse))\n")
+    println("$f_$f_$f_$f_$f_$f_$f_")
+    println("     Y     |      β         σ [S.E.]       t          P > |t|      [95% Conf. Interval] ")
+    println("$f_$f_$f_$f_$f_$f_$f_")
+    for i in 1:length(fitresult.beta)
+        print("    X[$i]   | $(@sprintf("%10f", fitresult.beta[i]))  ")
+        print(" $(@sprintf("%10f", sqrt(fitresult.variance[i,i])))  ")
+        print(" $(@sprintf("%8.3f", fitresult.tstat[i]))    ")
+        print(" $(@sprintf("%8.3f", fitresult.tsig[i]))      ")
+        print(" $(@sprintf("%8f", fitresult.confint[i][1]))   $(@sprintf("%8f", fitresult.confint[i][2]))")
+        println("")
+    end
+    println("$f_$f_$f_$f_$f_$f_$f_")
+    #print(" Variance: ")
+    #present(fitresult.variance)
     try
         robust = fitresult.robust
-        println("\n\n Robustness: $(robust)")
+        println("\n Robustness: $(robust)")
     catch end
     try
         converged = fitresult.converged
@@ -178,7 +193,7 @@ function Base.show(io::IO, fitresult::AbstractFittingResult)
         iterations = fitresult.iterations
         if iterations > 0 println("\n [ Iterations: $(iterations) ]") end
     catch end
-    println("\n- EndResult [ $(fitresult.callertype) ] -")
+    println("\n# $f_ EndResult [ $(fitresult.callertype) ] $f_ #")
 end
 
 """
@@ -189,13 +204,22 @@ Should not be used in actual implementations.
 """
 struct genericfitresult<:AbstractFittingResult
     callertype
+    N
     beta
     residuals
     mse
     variance
+    tstat
+    tsig
+    confint
 
-    function genericfitresult{T<:Number}(callertype::Any, beta::Array{T}, residuals::Array{T}, mse::T, variance::Array{T})
-        new(callertype, beta, residuals, mse, variance)
+    function genericfitresult{T<:Number}(callertype::Any, beta::Array{T}, residuals::Array{T}, variance::Array{T})
+        N = length(residuals)
+        mse = sum(residuals.^2)
+        tstat = squeeze(beta ./ sqrt.(diag(variance)), 2)
+        tsig = 2 * CDF(-abs.(tstat), (N - length(beta)), Student)
+        confint = [beta - 2*sqrt.(diag(variance)), beta + 2*sqrt.(diag(variance))]
+        new(callertype, N, beta, residuals, mse, variance, tstat, tsig, confint)
     end
 end
 
@@ -206,19 +230,27 @@ Type that wraps results for outputs of a `LinearRegressionType` regression.
 """
 struct linearfitresult<:AbstractFittingResult
     callertype
+    N
     beta
     residuals
     mse
     variance
+    tstat
+    tsig
+    confint
     robust::Any
     iterations::Int
 
     function linearfitresult{T<:Number}(callertype::Any, X::Array{T}, Y::Array{T}, beta::Array{T}, residuals::Array{T}, variance::Array{T}, robust::Any, iterations::Int=0)
+        N = length(residuals)
         mse = sum(residuals.^2)
+        tstat = squeeze(beta ./ sqrt.(diag(variance)), 2)
+        tsig = 2 * CDF(-abs.(tstat), (N - length(beta)), Student)
+        confint = [beta - 2*sqrt.(diag(variance)), beta + 2*sqrt.(diag(variance))]
         if robust != false && !(typeof(robust) <: AbstractVarianceMatrix)
             error("Robust option is unrecognized")
         end
-        new(callertype, beta, residuals, mse, variance, robust, iterations)
+        new(callertype, N, beta, residuals, mse, variance, tstat, tsig, confint, robust, iterations)
     end
 end
 
@@ -230,20 +262,28 @@ Type that wraps results for outputs of a `GLMRegressionType` regression.
 
 struct glmfitresult<:AbstractFittingResult
     callertype
+    N
     beta
     residuals
     mse
     variance
+    tstat
+    tsig
+    confint
     robust::Any
     converged::Bool
     iterations::Int
 
     function glmfitresult{T<:Number}(callertype::Any, X::Array{T}, Y::Array{T}, beta::Array{T}, residuals::Array{T}, variance::Array{T}, robust::Any, converged::Bool, iterations::Int=0)
+        N = length(residuals)
         mse = sum(residuals.^2)
+        tstat = squeeze(beta ./ sqrt.(diag(variance)), 2)
+        tsig = 2 * CDF(-abs.(tstat), (N - length(beta)), Student)
+        confint = [beta - 2*sqrt.(diag(variance)), beta + 2*sqrt.(diag(variance))]
         if robust != false && !(typeof(robust) <: AbstractVarianceMatrix)
             error("Robust option is unrecognized")
         end
-        new(callertype, beta, residuals, mse, variance, robust, converged, iterations)
+        new(callertype, N, beta, residuals, mse, variance, tstat, tsig, confint, robust, converged, iterations)
     end
 end
 
@@ -254,10 +294,14 @@ Type that wraps results for outputs of a `NonLinearRegressionType` regression.
 """
 struct nlinfitresult<:AbstractFittingResult
     callertype
+    N
     beta
     residuals
-    variance
     mse
+    variance
+    tstat
+    tsig
+    confint
     robust::Any
     converged::Bool
     iterations::Int
@@ -269,11 +313,15 @@ struct nlinfitresult<:AbstractFittingResult
         mse = Optim.minimum(optimresult)
         converged = Optim.converged(optimresult)
         """
+        N = length(residuals)
         mse = sum(residuals.^2)
+        tstat = beta ./ sqrt.(diag(variance))
+        tsig = 2 * CDF(-abs.(tstat), (N - length(beta)), Student)
+        confint = [beta - 2*sqrt.(diag(variance)), beta + 2*sqrt.(diag(variance))]
         if robust != false && !(typeof(robust) <: AbstractVarianceMatrix)
             error("Robust option is unrecognized")
         end
-        new(callertype, beta, residuals, variance, mse, robust, converged, iterations)
+        new(callertype, N, beta, residuals, mse, variance, tstat, tsig, confint, robust, converged, iterations)
     end
 end
 

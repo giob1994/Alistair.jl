@@ -2,7 +2,7 @@
 
 # OLS test:
 OLSRegression = OLS(intercept=true, robust=false)
-res = linregress(X, Y, OLSRegression)
+res = linregress(X, Y, OLSRegression; fast = true)
 
 # OLS robust test:
 OLSRegression = OLS(intercept=true, robust=HCEVariance())

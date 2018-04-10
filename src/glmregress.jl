@@ -2,12 +2,12 @@
 # Generalized Linear Models routines
 # -----------------------------------------------
 
-function glmregress{T<:Number}(X::Array{T}, Y::Array{T}, regtype=false)
+function glmregress{T<:Number}(X::Array{T}, Y::Array{T}, regtype=false; fast=false)
     if regtype == false
         error("glmregress() - No regression type specified")
     elseif regtype == Logit()
         if iscategorical(Y)
-            logit_glmfit(X, Y, regtype.intercept, regtype.robust)
+            logit_glmfit(X, Y, regtype.intercept, regtype.robust, fast=fast)
         else
             error("Y is not categorical")
         end
@@ -16,7 +16,7 @@ end
 
 # #########   LOGIT   #########
 
-function logit_glmfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=false, robust=false)
+function logit_glmfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=false, robust=false; fast=false)
     X = intercept ? addintercept(X) : nointercept(X)
     # Residual function given the model:
     theta0 = ones(size(X)[2])

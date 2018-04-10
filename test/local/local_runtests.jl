@@ -3,7 +3,7 @@ using Base.Test
 
 # TEST OPTIONS
 const TEST_SIZE_1 = 10
-const PRINT_RESULTS = false
+const PRINT_RESULTS = true
 RESULTS = Dict()
 
 beta = [0.7; 0.45]
@@ -11,6 +11,7 @@ X = hcat(ones(TEST_SIZE_1,1), collect(1.0:TEST_SIZE_1))
 Y = X * beta + 0.1*randn(TEST_SIZE_1, 1)
 # Y = [1.0 2.0 1.3 3.75 2.25]'
 
+#=
 if false
 @__test issingletonarray(X) == false
 @__test isrowarray(X) == false
@@ -23,6 +24,7 @@ if false
 @__test aprod([1], X) == X
 @__test aprod(X', Y) == X' * Y
 end
+=#
 
 if true
 # Test for all types

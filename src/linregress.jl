@@ -5,15 +5,15 @@
 """
 Linear regression function
 """
-function linregress{T<:Number}(X::Array{T}, Y::Array{T}, regtype=OLS())
+function linregress{T<:Number}(X::Array{T}, Y::Array{T}, regtype=OLS(); fast=false)
     if typeof(regtype) == OLS 
-        return ols_linfit(X, Y, regtype.intercept, regtype.robust)
+        return ols_linfit(X, Y, regtype.intercept, regtype.robust, fast=fast)
     elseif typeof(regtype) == GLS
-        return gls_linfit(X, Y, regtype.omega, regtype.intercept, regtype.robust)
+        return gls_linfit(X, Y, regtype.omega, regtype.intercept, regtype.robust, fast=fast)
     elseif typeof(regtype) == FGLS
-        return fgls_linfit(X, Y, regtype.intercept, regtype.robust)
+        return fgls_linfit(X, Y, regtype.intercept, regtype.robust, fast=fast)
     elseif typeof(regtype) == IteratedFGLS
-        return iteratedfgls_linfit(X, Y, regtype.iterations, regtype.intercept, regtype.robust)
+        return iteratedfgls_linfit(X, Y, regtype.iterations, regtype.intercept, regtype.robust, fast=fast)
     elseif false
         return false
     end
@@ -21,7 +21,7 @@ end
 
 # #########   OLS   #########
 
-function ols_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust=false)
+function ols_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust=false; fast=false)
     X = intercept ? addintercept(X) : nointercept(X)
     ols_beta = (X' * X) \ (X' * Y)
     residuals = Y - aprod(X, ols_beta)
@@ -32,20 +32,27 @@ function ols_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust=
     elseif typeof(robust) == HCEVariance
         variance = HCEVariance(X, residuals)
     end
-    return linearfitresult(OLS, X, Y, ols_beta, residuals, variance, robust)  
+    return fast ? (ols_beta, variance) : linearfitresult(OLS, X, Y, ols_beta, residuals, variance, robust)  
 end
 
 # #########   GLS   #########
 
-function gls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, omega::Array{T}, intercept=true, robust=false)
+function gls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, omega::Array{T}, intercept=true, robust=false; fast=false)
     X = intercept ? addintercept(X) : nointercept(X)
-    #TODO
-    return 1
+    # Use the supplied Ω:
+    gls_beta = (X' * inv(omega) * X) \ (X' * inv(omega) * Y)
+    residuals = Y - aprod(X, gls_beta)
+    if robust == false || typeof(robust) == BasicVariance
+        variance = BasicVariance(X, residuals, length(gls_beta))
+    elseif typeof(robust) == HCEVariance
+        variance = HCEVariance(X, residuals)
+    end
+    return fast ? (gls_beta, variance) : linearfitresult(GLS, X, Y, gls_beta, residuals, variance, robust) 
 end
 
 # #########   FGLS   #########
 
-function fgls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust=false)
+function fgls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust=false; fast=false)
     X = intercept ? addintercept(X) : nointercept(X)
     # (1) Execute OLS regression to compute residuals:
     residuals = Y - X * ((X' * X) \ (X' * Y))
@@ -60,12 +67,12 @@ function fgls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust
     elseif typeof(robust) == HCEVariance
         variance = HCEVariance(X, residuals)
     end
-    return linearfitresult(FGLS, X, Y, fgls_beta, residuals, variance, robust) 
+    return fast ? (fgls_beta, variance) : linearfitresult(FGLS, X, Y, fgls_beta, residuals, variance, robust) 
 end
 
 # #########   Iterated FGLS   #########
 
-function iteratedfgls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, iterations::Int=1, intercept=true, robust=false)
+function iteratedfgls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, iterations::Int=1, intercept=true, robust=false; fast=false)
     X = intercept ? addintercept(X) : nointercept(X)
     # (1) Execute OLS regression to compute residuals:
     itfgls_beta = (X' * X) \ (X' * Y)
@@ -91,5 +98,5 @@ function iteratedfgls_linfit{T<:Number}(X::Array{T}, Y::Array{T}, iterations::In
     elseif typeof(robust) == HCEVariance
         variance = HCEVariance(X, residuals)
     end
-    return linearfitresult(IteratedFGLS, X, Y, itfgls_beta, residuals, variance, robust, iter) 
+    return fast ? (itfgls_beta, variance) : linearfitresult(IteratedFGLS, X, Y, itfgls_beta, residuals, variance, robust, iter) 
 end

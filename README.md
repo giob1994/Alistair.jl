@@ -39,14 +39,14 @@ Pkg.clone("https://github.com/giob1994/Alistair.jl.git")
 ```
 #### Dependencies
 - **[Optim.jl](https://github.com/JuliaNLSolvers/Optim.jl)** – non-linear regression and optimization backend.
+- **[Rmath.jl](https://github.com/JuliaStats/Rmath.jl)** – distributions backend.
 
 ## Features
 
 - [x] **Linear Regressions**: OLS, GLS, Feasible GLS, Iterated FGLS.
 - [x] **Robust Variance Matrices**: simple and HCE (Eicker-White) variance.
 - [x] **Non-Linear Regression**: generic solver for *any* `Y = f(X, β)` model.
-- [ ] *Confidence Intervals*.
-- [ ] *T-test*.
+- [x] **T-test & Confidence Intervals** for coefficients
 - [ ] *Logit/Probit, Multivariate Regressions*.
 - [ ] *Syntactic Function Interpreter* for non-linear models.
 - [ ] *Compatibility with DataFrames*.
