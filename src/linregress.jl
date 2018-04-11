@@ -5,6 +5,7 @@
 """
 Linear regression function
 """
+#=
 function linregress{T<:Number}(X::Array{T}, Y::Array{T}, regtype=OLS(); fast=false)
     if typeof(regtype) == OLS 
         return ols_linfit(X, Y, regtype.intercept, regtype.robust, fast=fast)
@@ -18,9 +19,18 @@ function linregress{T<:Number}(X::Array{T}, Y::Array{T}, regtype=OLS(); fast=fal
         return false
     end
 end
+=#
+
+function linregress{T<:Number}(X::Array{T}, Y::Array{T}, regtype=OLS(); fast=false)
+    if isdefined(regtype, :intercept)
+        X = regtype.intercept ? addintercept(X) : nointercept(X)
+    end 
+    return regtype(X, Y, fast=fast)   
+end
 
 # #########   OLS   #########
 
+#=
 function ols_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust=false; fast=false)
     X = intercept ? addintercept(X) : nointercept(X)
     ols_beta = (X' * X) \ (X' * Y)
@@ -33,6 +43,18 @@ function ols_linfit{T<:Number}(X::Array{T}, Y::Array{T}, intercept=true, robust=
         variance = HCEVariance(X, residuals)
     end
     return fast ? (ols_beta, variance) : linearfitresult(OLS, X, Y, ols_beta, residuals, variance, robust)  
+end
+=#
+
+function (olsreg::OLS)(X::Array{T}, Y::Array{T}; fast=false) where {T<:Number}
+    ols_beta = (X' * X) \ (X' * Y)
+    residuals = Y - aprod(X, ols_beta)
+    if olsreg.robust == false || typeof(olsreg.robust) == BasicVariance
+        variance = BasicVariance(X, residuals, length(ols_beta))
+    elseif typeof(robust) == HCEVariance
+        variance = HCEVariance(X, residuals)
+    end
+    return fast ? (ols_beta, variance) : linearfitresult(OLS, X, Y, ols_beta, residuals, variance, olsreg.robust) 
 end
 
 # #########   GLS   #########
