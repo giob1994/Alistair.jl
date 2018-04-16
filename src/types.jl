@@ -158,45 +158,6 @@ Every output is thus packaged in a precise type, depending on the originating re
 """
 abstract type AbstractFittingResult end
 
-function Base.show(io::IO, fitresult::AbstractFittingResult)
-    # println(io, "£$(money.pounds).$(money.shillings)s.$(money.pence)d")
-    f_ = "-------------"
-    s_ = "  "
-    println("\n# $f_ RegResult [ $(fitresult.callertype) ] $f_ #\n")
-    #println(" Beta: $(fitresult.beta)\n")
-    #present(fitresult.beta)
-    println(" N of obs.: \t$(@sprintf("%8d", fitresult.N))")
-    println(" MSE:       \t$(@sprintf("%8f", fitresult.mse))\n")
-    println("$f_$f_$f_$f_$f_$f_$f_")
-    println("     Y     |      β         σ [S.E.]       t          P > |t|      [95% Conf. Interval] ")
-    println("$f_$f_$f_$f_$f_$f_$f_")
-    for i in 1:length(fitresult.beta)
-        print("    X[$i]   |")
-        print(" $(@sprintf("%10f", fitresult.beta[i]))  ")
-        print(" $(@sprintf("%10f", sqrt(fitresult.variance[i,i])))  ")
-        print(" $(@sprintf("%8.3f", fitresult.tstat[i]))    ")
-        print(" $(@sprintf("%8.3f", fitresult.tsig[i]))      ")
-        print(" $(@sprintf("%8f", fitresult.confint[i][1]))   $(@sprintf("%8f", fitresult.confint[i][2]))")
-        println("")
-    end
-    println("$f_$f_$f_$f_$f_$f_$f_")
-    #print(" Variance: ")
-    #present(fitresult.variance)
-    try
-        robust = fitresult.robust
-        println("\n Robustness: $(robust)")
-    catch end
-    try
-        converged = fitresult.converged
-        println("\n Converged: $(converged)")
-    catch end
-    try
-        iterations = fitresult.iterations
-        if iterations > 0 println("\n [ Iterations: $(iterations) ]") end
-    catch end
-    println("\n# $f_ EndResult [ $(fitresult.callertype) ] $f_ #")
-end
-
 """
 ### Generic Fitting Result
 
@@ -266,7 +227,7 @@ struct glmfitresult<:AbstractFittingResult
     N
     beta
     residuals
-    mse
+    fit
     variance
     tstat
     tsig
@@ -275,16 +236,19 @@ struct glmfitresult<:AbstractFittingResult
     converged::Bool
     iterations::Int
 
-    function glmfitresult{T<:Number}(callertype::Any, X::Array{T}, Y::Array{T}, beta::Array{T}, residuals::Array{T}, variance::Array{T}, robust::Any, converged::Bool, iterations::Int=0)
+    function glmfitresult{T<:Number}(callertype::Logit, X::Array{T}, Y::Array{T}, beta::Array{T}, residuals::Array{T}, variance::Array{T}, robust::Any, converged::Bool, iterations::Int=0)
         N = length(residuals)
-        mse = sum(residuals.^2)
-        tstat = squeeze(beta ./ sqrt.(diag(variance)), 2)
+        fit = -2*logLike(X, Y, beta, Logistic)
+        tstat = beta ./ sqrt.(diag(variance))
+        if length(size(tstat)) > 1
+            tstat = squeeze(tstat, 2)
+        end
         tsig = 2 * CDF(-abs.(tstat), (N - length(beta)), Student)
         confint = [beta - 2*sqrt.(diag(variance)), beta + 2*sqrt.(diag(variance))]
         if robust != false && !(typeof(robust) <: AbstractVarianceMatrix)
             error("Robust option is unrecognized")
         end
-        new(callertype, N, beta, residuals, mse, variance, tstat, tsig, confint, robust, converged, iterations)
+        new(callertype, N, beta, residuals, fit, variance, tstat, tsig, confint, robust, converged, iterations)
     end
 end
 

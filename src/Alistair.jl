@@ -38,6 +38,9 @@ module Alistair
         PDF,
         CDF,
         logLike,
+        Normal,
+        Logistic,
+        Student,
         # Tools
         __test,
         present
@@ -49,5 +52,6 @@ module Alistair
     include("glmregress.jl")
     include("nlinregress.jl")
     include("genericregress.jl")
+    include("showresults.jl")
 
 end # module end
