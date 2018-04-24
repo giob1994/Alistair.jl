@@ -29,6 +29,7 @@ tic()
 
 @time @test include("linreg_tests.jl")
 @time @test include("genreg_tests.jl")
+@time @test include("glmreg_tests.jl")
 
 # End test
 toc()

@@ -144,14 +144,14 @@ res = linregress(X, Y, OLS())
 Alistair.jl has specific functions to solve each type of regression, so this call to `linregress()` is routed to:
 
 ```julia
-ols_linfit(X, Y, intercept=true, robust=false)
+OLS(X, Y, intercept=true, robust=false)
 ```
 
-which you can call yourself too, if you so want! Alistair.jl exports `ols_linfit()` for the brave and intrepid.
+which you can call yourself too, if you so want! Alistair.jl exports `OLS()` for the brave and intrepid.
 
 #### Robust variance matrices
 
-As you might have notices, `OLS()` has an argument called `robust`. Alistair.jl allows to specify the way of computing the variance-covariance matrix of the regression, and specifically allows for the **Eicker-White HEC** form.
+As you might have noticed, `OLS()` has an argument called `robust`. Alistair.jl allows to specify the way of computing the variance-covariance matrix of the regression, and specifically allows for the **Eicker-White HEC** form.
 
 *Example*:
 ```julia
@@ -162,9 +162,9 @@ As you might have notices, `OLS()` has an argument called `robust`. Alistair.jl 
 res = linregress(X, Y, OLS(robust=HCEVariance()))
 ```
 
-#### Printing results
+#### Printing results, *beautifully*
 
-We all like pretty printing when it comes to results! Alistair.jl defines for every result type a *nice* overload of Julia `Base.show()` method, so a nice output can be showed without hassle by using `print()`, `println()` or `show()`!
+We all like pretty printing when it comes to results. Alistair.jl defines for every result type a *nice* overload of Julia `Base.show()` method, so a nice output can be showed without hassle by simply using `print()`, `println()` or `show()`!
 
 *Example*:
 ```julia

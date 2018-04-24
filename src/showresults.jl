@@ -6,7 +6,7 @@ function Base.show(io::IO, fitresult::AbstractFittingResult)
     # println(io, "£$(money.pounds).$(money.shillings)s.$(money.pence)d")
     f_ = "-------------"
     #s_ = "  "
-    println("\n# $f_ RegResult [ $(fitresult.callertype) ] $f_ #\n")
+    println("\n# $f_ RegResult [ $(typeof(fitresult.callertype)) ] $f_ #\n")
     #println(" Beta: $(fitresult.beta)\n")
     #present(fitresult.beta)
     println(" N of obs.: \t$(@sprintf("%8d", fitresult.N))")
@@ -38,14 +38,14 @@ function Base.show(io::IO, fitresult::AbstractFittingResult)
         iterations = fitresult.iterations
         if iterations > 0 println("\n [ Iterations: $(iterations) ]") end
     catch end
-    println("\n# $f_ EndResult [ $(fitresult.callertype) ] $f_ #")
+    println("\n# $f_ EndResult [ $(typeof(fitresult.callertype)) ] $f_ #")
 end
 
 function Base.show(io::IO, fitresult::glmfitresult)
     # println(io, "£$(money.pounds).$(money.shillings)s.$(money.pence)d")
     f_ = "-------------"
     #s_ = "  "
-    println("\n# $f_ RegResult [ $(fitresult.callertype) ] $f_ #\n")
+    println("\n# $f_ RegResult [ $(typeof(fitresult.callertype)) ] $f_ #\n")
     #println(" Beta: $(fitresult.beta)\n")
     #present(fitresult.beta)
     println(" N of obs.: \t$(@sprintf("%8d", fitresult.N))")
@@ -81,5 +81,5 @@ function Base.show(io::IO, fitresult::glmfitresult)
         iterations = fitresult.iterations
         if iterations > 0 println("\n [ Iterations: $(iterations) ]") end
     catch end
-    println("\n# $f_ EndResult [ $(fitresult.callertype) ] $f_ #")
+    println("\n# $f_ EndResult [ $(typeof(fitresult.callertype)) ] $f_ #")
 end
