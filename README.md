@@ -8,7 +8,7 @@
 
 <h3 align="center">A <i>minimal</i> regression library for <a href="http://julialang.org" target="_blank">Julia</a></h3>
 <p align="center">
- <img src="https://img.shields.io/badge/Version-beta%200.2-a380bc.svg">
+ <img src="https://img.shields.io/badge/Version-beta%200.3-a380bc.svg">
    &nbsp;
  <a href="http://julialang.org">
  	<img src="https://img.shields.io/badge/Julia-v0.6-brightgreen.svg">
