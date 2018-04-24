@@ -45,13 +45,11 @@ Pkg.clone("https://github.com/giob1994/Alistair.jl.git")
 
 - [x] **Linear Regressions**: OLS, GLS, Feasible GLS, Iterated FGLS.
 - [x] **Robust Variance Matrices**: simple and HCE (Eicker-White) variance.
-- [x] **Non-Linear Regression**: generic solver for *any* `Y = f(X, β)` model.
 - [x] **T-test & Confidence Intervals** for estimated coefficients.
+- [x] **Non-Linear Regression** (*prototype*): generic solver for *any* model specified as `Y = f(X, β)`.
 - [ ] *Logit/Probit, Multivariate Regressions*.
 - [ ] *Syntactic Function Interpreter* for non-linear models.
 - [ ] *Compatibility with DataFrames*.
-
-#### 
 
 
 ## Why Alistair.jl?
@@ -106,7 +104,7 @@ ret = solve(linearreg(X, Y; bias=1.0);
 
 Alistair.jl is *minimal*, that is, it already assumes that you are aware of the data you are using... at least a bit!
 
-These is is a cheatsheet of good-to-know assumptions Alistair.jl makes:
+This is a cheatsheet of good-to-know assumptions Alistair.jl makes:
 
 - `Y [response array]` 
 	- is a 1D array containing only numbers: `Float64/32` type is recommended.
@@ -146,14 +144,14 @@ res = linregress(X, Y, OLS())
 Alistair.jl has specific functions to solve each type of regression, so this call to `linregress()` is routed to:
 
 ```julia
-ols_linfit(X, Y, intercept=true, robust=false)
+OLS(X, Y, intercept=true, robust=false)
 ```
 
-which you can call yourself too, if you so want! Alistair.jl exports `ols_linfit()` for the brave and intrepid.
+which you can call yourself too, if you so want! Alistair.jl exports `OLS()` for the brave and intrepid.
 
 #### Robust variance matrices
 
-As you might have notices, `OLS()` has an argument called `robust`. Alistair.jl allows to specify the way of computing the variance-covariance matrix of the regression, and specifically allows for the **Eicker-White HEC** form.
+As you might have noticed, `OLS()` has an argument called `robust`. Alistair.jl allows to specify the way of computing the variance-covariance matrix of the regression, and specifically allows for the **Eicker-White HEC** form.
 
 *Example*:
 ```julia
@@ -164,9 +162,9 @@ As you might have notices, `OLS()` has an argument called `robust`. Alistair.jl 
 res = linregress(X, Y, OLS(robust=HCEVariance()))
 ```
 
-#### Printing results
+#### Printing results, *beautifully*
 
-We all like pretty printing when it comes to results! Alistair.jl defines for every result type a *nice* overload of Julia `Base.show()` method, so a nice output can be showed without hassle by using `print()`, `println()` or `show()`!
+We all like pretty printing when it comes to results. Alistair.jl defines for every result type a *nice* overload of Julia `Base.show()` method, so a nice output can be showed without hassle by simply using `print()`, `println()` or `show()`!
 
 *Example*:
 ```julia
@@ -191,7 +189,7 @@ julia> println(linregress(X, Y, OLS()))
 
 ## Types
 
-Alistair specifies its own types for regressions and more. This is a useful cheetsheet:
+Alistair specifies its own types for regressions and more. This is a useful cheatsheet:
 
 ### Regression Types
 
@@ -246,4 +244,4 @@ myVariance = <VarianceMatrixTypeYouNeed>(...)
 
 ## Note on Performance
 
-**Alistair.jl** is coded in standard Julia language operators like `\\`, `\*` and `inv()`. Since Julia automatically produces code that uses LAPACK functions [[1]](https://docs.julialang.org/en/stable/stdlib/linalg/), there is no real use in fiddling with LAPACK functions *inside* Julia. However, it might interesting to explore usage of SIMD functions and the parallel programming capabilities of Julia to accelerate regressions with datasets in the order of 10⁵-10⁶ observations or more.
+**Alistair.jl** is coded in standard Julia language operators like `\`, `*` and `inv()`. Since Julia automatically produces code that uses LAPACK functions [[1]](https://docs.julialang.org/en/stable/stdlib/linalg/), there is no real use in fiddling with LAPACK functions *inside* Julia. However, it might interesting to explore usage of SIMD functions and the parallel programming capabilities of Julia to accelerate regressions with datasets in the order of 10⁵-10⁶ observations or more.
